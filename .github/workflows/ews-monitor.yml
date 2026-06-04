@@ -1,0 +1,40 @@
+name: EWS monitor
+
+on:
+  schedule:
+    - cron: "5,35 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ews-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Consultar EWS y avisar
+        env:
+          EWS_MODE: ${{ vars.EWS_MODE }}
+          EWS_DASHBOARD_URL: ${{ vars.EWS_DASHBOARD_URL }}
+          EWS_THRESHOLD: ${{ vars.EWS_THRESHOLD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python ews_alert.py
+
+      - name: Persistir estado e historico
+        run: |
+          git config user.name  "ews-bot"
+          git config user.email "ews-bot@users.noreply.github.com"
+          git add ews_state.json ews_log.csv 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "ews: update state/log"
+          git push || true
