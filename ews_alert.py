@@ -47,10 +47,10 @@ import xml.etree.ElementTree as ET
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ----------------------------- Configuracion -----------------------------
-MODE          = os.getenv("EWS_MODE", "rss").strip().lower()
+MODE          = (os.getenv("EWS_MODE") or "rss").strip().lower()
 RSS_URL       = os.getenv("EWS_RSS_URL", "https://ews.kylemcdonald.net/rss.xml")
 DASHBOARD_URL = os.getenv("EWS_DASHBOARD_URL", "").strip()
-THRESHOLD     = int(os.getenv("EWS_THRESHOLD", "4"))
+THRESHOLD     = int(os.getenv("EWS_THRESHOLD") or "4")
 TG_TOKEN      = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TG_CHAT       = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 STATE_FILE    = os.getenv("EWS_STATE_FILE", os.path.join(BASE_DIR, "ews_state.json"))
