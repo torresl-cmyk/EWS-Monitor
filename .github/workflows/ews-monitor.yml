@@ -35,6 +35,7 @@ jobs:
         run: |
           git config user.name  "ews-bot"
           git config user.email "ews-bot@users.noreply.github.com"
-          git add ews_state.json ews_log.csv 2>/dev/null || true
+          git add ews_log.csv 2>/dev/null || true
+          git add ews_state.json 2>/dev/null || true
           git diff --cached --quiet || git commit -m "ews: update state/log"
-          git push || true
+          git push
