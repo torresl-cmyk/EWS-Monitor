@@ -55,6 +55,7 @@ TG_TOKEN      = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TG_CHAT       = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 STATE_FILE    = os.getenv("EWS_STATE_FILE", os.path.join(BASE_DIR, "ews_state.json"))
 LOG_FILE      = os.getenv("EWS_LOG_FILE", os.path.join(BASE_DIR, "ews_log.csv"))
+HEARTBEAT     = (os.getenv("EWS_HEARTBEAT") or "").strip() not in ("", "0")
 
 TIMEOUT = 25
 USER_AGENT = "ews-alert-personal/1.0 (uso personal; cadencia 30min)"
@@ -252,6 +253,13 @@ def main():
             check_dashboard()
         else:
             check_rss()
+        if HEARTBEAT:
+            send_telegram(
+                "EWS activo (latido semanal).\n"
+                "El monitor esta funcionando; te avisa si hay nivel 5.\n"
+                "https://ews.kylemcdonald.net/"
+            )
+            print("latido enviado")
     except urllib.error.HTTPError as e:
         print("ERROR HTTP {}: {}".format(e.code, e.reason), file=sys.stderr)
         sys.exit(1)
