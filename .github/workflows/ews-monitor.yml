@@ -2,8 +2,10 @@ name: EWS monitor
 
 on:
   schedule:
+    # El sitio refresca cada 30 min; consultamos a los :05 y :35 para datos frescos.
     - cron: "5,35 * * * *"
-    - cron: "0 13 * * 0,3"
+    # Latido semanal: sabado 15:00 hora Buenos Aires (18:00 UTC).
+    - cron: "0 18 * * 6"
   workflow_dispatch:
     inputs:
       heartbeat:
@@ -30,19 +32,45 @@ jobs:
 
       - name: Consultar EWS y avisar
         env:
-          EWS_MODE: ${{ vars.EWS_MODE }}
-          EWS_DASHBOARD_URL: ${{ vars.EWS_DASHBOARD_URL }}
-          EWS_THRESHOLD: ${{ vars.EWS_THRESHOLD }}
+          EWS_MODE: ${{ vars.EWS_MODE }}                 # "rss" o "dashboard"
+          EWS_DASHBOARD_URL: ${{ vars.EWS_DASHBOARD_URL }} # solo modo dashboard
+          EWS_THRESHOLD: ${{ vars.EWS_THRESHOLD }}         # ej. 4
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          EWS_HEARTBEAT: ${{ (github.event.schedule == '0 13 * * 0,3' || github.event.inputs.heartbeat == 'true') && '1' || '' }}
+          EWS_HEARTBEAT: ${{ (github.event.schedule == '0 18 * * 6' || github.event.inputs.heartbeat == 'true') && '1' || '' }}
         run: python ews_alert.py
 
       - name: Persistir estado e historico
         run: |
           git config user.name  "ews-bot"
           git config user.email "ews-bot@users.noreply.github.com"
-          git add ews_log.csv 2>/dev/null || true
           git add ews_state.json 2>/dev/null || true
+          git add ews_log.csv 2>/dev/null || true
           git diff --cached --quiet || git commit -m "ews: update state/log"
-          git push
+          git push || true
+
+2) ews_alert.py — reemplazá la función main() completa (busca # ----- Main ----- cerca del final del archivo) por esta:
+
+# ----------------------------------- Main ----------------------------------
+def main():
+    try:
+        if MODE == "dashboard":
+            check_dashboard()
+        else:
+            check_rss()
+        if HEARTBEAT:
+            send_telegram(
+                "EWS activo - Latido semanal\n"
+                "El monitor esta funcionando; te avisare si hay nivel 5."
+            )
+            print("latido enviado")
+    except urllib.error.HTTPError as e:
+        print("ERROR HTTP {}: {}".format(e.code, e.reason), file=sys.stderr)
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print("ERROR de red:", e.reason, file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
