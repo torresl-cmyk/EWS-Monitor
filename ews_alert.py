@@ -255,9 +255,9 @@ def main():
             check_rss()
         if HEARTBEAT:
             send_telegram(
-                "EWS activo (latido semanal).\n"
-                "El monitor esta funcionando; te avisa si hay nivel 5.\n"
-                "https://ews.kylemcdonald.net/"
+                "EWS activo - latido semanal -.\n"
+                "El monitor esta funcionando; te avisaremos si hay nivel 5.\n"
+                
             )
             print("latido enviado")
     except urllib.error.HTTPError as e:
