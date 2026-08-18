@@ -2414,3 +2414,4 @@ timestamp_utc,mode,level,airborne,expected,alerted,detail
 2026-08-18T06:30:35+00:00,rss,,,,False,sin items (nivel < 5)
 2026-08-18T06:51:40+00:00,rss,,,,False,sin items (nivel < 5)
 2026-08-18T07:00:50+00:00,rss,,,,False,sin items (nivel < 5)
+2026-08-18T07:30:36+00:00,rss,,,,False,sin items (nivel < 5)
